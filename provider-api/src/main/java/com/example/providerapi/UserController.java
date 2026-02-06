@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
 
-@Validated // 👈 enable method-parameter validation
+@Validated //  enable method-parameter validation
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -49,6 +49,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build(); // 404 with empty body
         }
         return ResponseEntity.ok(user); // 200 with UserDto
+        //return ResponseEntity.ok(new UserDto(id, "John", null)); //TO TEST THE CONTRACT
     }
 
     @Operation(
