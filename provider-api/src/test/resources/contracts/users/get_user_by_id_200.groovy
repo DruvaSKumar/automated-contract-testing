@@ -1,5 +1,7 @@
 package contracts.users
 
+//the source of truth for provider expectations; SCC reads these to generate & run tests.
+
 import org.springframework.cloud.contract.spec.Contract
 
 Contract.make {

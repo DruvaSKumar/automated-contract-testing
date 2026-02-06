@@ -4,7 +4,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 
-
+// stable contract surface (explicit fields, types, constraints).
 
 @Schema(name = "UserDto", description = "User representation returned by the API")
 public class UserDto {

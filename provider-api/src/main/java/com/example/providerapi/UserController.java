@@ -1,5 +1,5 @@
 package com.example.providerapi;
-
+// all REST endpoints for users (the provider we verify).
 import com.example.providerapi.dto.UserDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;

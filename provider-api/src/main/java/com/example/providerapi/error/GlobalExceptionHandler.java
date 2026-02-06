@@ -1,5 +1,7 @@
 package com.example.providerapi.error;
 
+//consistent HTTP 400 for validation failures in tests.
+
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
