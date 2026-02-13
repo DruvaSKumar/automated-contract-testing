@@ -114,4 +114,142 @@
 		</plugins>
 	</build>
 
+	<profiles>
+		<profile>
+			<id>contracts</id>
+
+			<build>
+				<plugins>
+
+					<!-- 1) Start/Stop the app around the integration-test window -->
+					<plugin>
+						<groupId>org.springframework.boot</groupId>
+						<artifactId>spring-boot-maven-plugin</artifactId>
+						<executions>
+							<!-- Start the app before we run our generator -->
+							<execution>
+								<id>start-app</id>
+								<phase>pre-integration-test</phase>
+								<goals>
+									<goal>start</goal>
+								</goals>
+								<!-- optional JVM args, e.g., to color logs -->
+								<configuration>
+									<jvmArguments>
+										-Dspring.output.ansi.enabled=always
+									</jvmArguments>
+								</configuration>
+							</execution>
+
+							<!-- Stop the app after everything is done -->
+							<execution>
+								<id>stop-app</id>
+								<phase>post-integration-test</phase>
+								<goals>
+									<goal>stop</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- 2) Run the Python generator while the app is up -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>exec-maven-plugin</artifactId>
+						<version>3.2.0</version>
+						<executions>
+							<execution>
+								<id>generate-contracts-from-openapi</id>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>exec</goal>
+								</goals>
+								<configuration>
+									<!-- Use 'python' from PATH; on Windows this is fine if Python installed -->
+									<executable>python</executable>
+									<!-- VERY IMPORTANT: run from module root so paths are correct -->
+									<workingDirectory>${project.basedir}</workingDirectory>
+									<arguments>
+										<argument>scripts/openapi-to-scc.py</argument>
+									</arguments>
+									<environmentVariables>
+										<!-- If you ever change port/path, override here -->
+										<OPENAPI_URL>http://localhost:8080/v3/api-docs</OPENAPI_URL>
+										<!-- Optional: override output directory -->
+										<!-- <OUT_DIR>src/test/resources/contracts/generated</OUT_DIR> -->
+									</environmentVariables>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- 3) Run contract tests after generation (call Surefire explicitly here) -->
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>3.5.4</version>
+						<executions>
+							<execution>
+								<id>run-surefire-during-it</id>
+								<phase>integration-test</phase>
+								<goals>
+									<goal>test</goal>
+								</goals>
+								<!-- normally surefire runs in the 'test' phase; we also trigger it here
+                                     so contracts generated in integration-test are picked up -->
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- (Optional) If IDEs don't pick up SCC generated test-sources -->
+					<plugin>
+						<groupId>org.codehaus.mojo</groupId>
+						<artifactId>build-helper-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>add-scc-generated-tests</id>
+								<phase>generate-test-sources</phase>
+								<goals>
+									<goal>add-test-source</goal>
+								</goals>
+								<configuration>
+									<sources>
+										<source>${project.build.directory}/generated-test-sources/contracts/</source>
+									</sources>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+
+					<!-- (Optional, later) Persist /v3/api-docs to a file during integration-test
+                         It requires the app to be running; the plugin itself coordinates with boot:start/stop.
+                         See springdoc docs: it runs in integration-tests phase. -->
+					<!--
+                    <plugin>
+                      <groupId>org.springdoc</groupId>
+                      <artifactId>springdoc-openapi-maven-plugin</artifactId>
+                      <version>1.5</version>
+                      <executions>
+                        <execution>
+                          <id>generate-openapi-json</id>
+                          <phase>integration-test</phase>
+                          <goals>
+                            <goal>generate</goal>
+                          </goals>
+                          <configuration>
+                            <apiDocsUrl>http://localhost:8080/v3/api-docs</apiDocsUrl>
+                            <outputDir>${project.build.directory}</outputDir>
+                            <outputFileName>openapi.json</outputFileName>
+                            <failOnError>true</failOnError>
+                          </configuration>
+                        </execution>
+                      </executions>
+                    </plugin>
+                    -->
+
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
+
 </project>
