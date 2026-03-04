@@ -13,6 +13,7 @@ What was built:
 - Swagger/OpenAPI via springdoc-openapi
 
 Verification:
+-run: mvn spring-boot:run
 - http://localhost:8080/users/1 → OK
 - http://localhost:8080/swagger-ui.html → OK
 
